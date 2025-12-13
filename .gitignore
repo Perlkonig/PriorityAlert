@@ -1,0 +1,13 @@
+# Folders and files created by Android Studio
+.gradle/
+build/
+.idea/
+captures/
+.DS_Store
+
+# Local configuration file (sdk path, etc.)
+local.properties
+
+# Keystore files
+*.jks
+*.keystore
