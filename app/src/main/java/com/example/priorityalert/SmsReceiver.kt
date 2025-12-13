@@ -3,9 +3,9 @@ package com.example.priorityalert
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
-import android.net.Uri
 
 class SmsReceiver : BroadcastReceiver() {
 
@@ -14,20 +14,23 @@ class SmsReceiver : BroadcastReceiver() {
             val priorityAlertManager = PriorityAlertManager(context)
             if (priorityAlertManager.getEnabled()) {
                 val contacts = priorityAlertManager.getContacts()
-                val keyword = priorityAlertManager.getKeyword()
+                val triggerPhrase = priorityAlertManager.getKeyword()
 
-                if (contacts.isNotEmpty() && !keyword.isNullOrBlank()) {
+                if (contacts.isNotEmpty() && !triggerPhrase.isNullOrBlank()) {
                     val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+
                     for (smsMessage in messages) {
                         val sender = smsMessage.originatingAddress
                         val messageBody = smsMessage.messageBody
-                        if (sender != null && contacts.any { sender.contains(it) } && messageBody.contains(keyword, ignoreCase = true)) {
+
+                        if (sender != null && contacts.any { sender.contains(it) } && messageBody.contains(triggerPhrase, ignoreCase = true)) {
                             val contactName = getContactName(context, sender) ?: sender
                             val alertIntent = Intent(context, AlertActivity::class.java).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 putExtra("sender", contactName)
                             }
                             context.startActivity(alertIntent)
+                            break // Trigger alert once per set of messages
                         }
                     }
                 }

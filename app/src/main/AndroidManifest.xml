@@ -32,6 +32,11 @@
             android:name=".AlertActivity"
             android:exported="false"
             android:theme="@style/Theme.PriorityAlert.NoActionBar" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="About Priority Alert"
+            android:theme="@style/Theme.PriorityAlert" />
         <receiver
             android:name=".SmsReceiver"
             android:exported="true"
