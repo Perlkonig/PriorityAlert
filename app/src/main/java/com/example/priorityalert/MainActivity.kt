@@ -73,8 +73,7 @@ class MainActivity : ComponentActivity() {
             val channel = NotificationChannel("priority_alert_channel", name, importance).apply {
                 description = descriptionText
             }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -285,7 +284,7 @@ fun PriorityAlertScreen(modifier: Modifier = Modifier) {
                         modifier = Modifier.weight(1f)
                     )
                     Button(onClick = {
-                        val updatedContacts = selectedContactNumbers - contact
+                        val updatedContacts = selectedContactNumbers.minus(contact)
                         selectedContactNumbers = updatedContacts
                         priorityAlertManager.saveContacts(updatedContacts)
                         Toast.makeText(context, "Contact Removed", Toast.LENGTH_SHORT).show()
