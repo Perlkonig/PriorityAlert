@@ -122,7 +122,16 @@ fun PriorityAlertScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    fun canDrawOverlays(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Settings.canDrawOverlays(context)
+        } else {
+            true
+        }
+    }
+
     var hasPermissions by remember { mutableStateOf(checkPermissions()) }
+    var hasOverlayPermission by remember { mutableStateOf(canDrawOverlays()) }
 
     var enabled by remember { mutableStateOf(priorityAlertManager.getEnabled()) }
     var keyword by remember { mutableStateOf(priorityAlertManager.getKeyword() ?: "") }
@@ -136,6 +145,10 @@ fun PriorityAlertScreen(modifier: Modifier = Modifier) {
         if (!hasPermissions) {
             Toast.makeText(context, "Permissions not granted. The app may not function correctly.", Toast.LENGTH_LONG).show()
         }
+    }
+
+    val overlayPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        hasOverlayPermission = canDrawOverlays()
     }
 
     val contactPickerLauncher = rememberLauncherForActivityResult(
@@ -247,6 +260,22 @@ fun PriorityAlertScreen(modifier: Modifier = Modifier) {
                     }
                 }
             }
+            if (!hasOverlayPermission) {
+                item {
+                    Card(modifier = Modifier.padding(8.dp)) {
+                        Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("This app requires permission to display alerts over other apps.", textAlign = TextAlign.Center)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = {
+                                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
+                                overlayPermissionLauncher.launch(intent)
+                            }) {
+                                Text("Grant Overlay Permission")
+                            }
+                        }
+                    }
+                }
+            }
             item {
                 Button(
                     onClick = { contactPickerLauncher.launch(null) },
@@ -329,7 +358,7 @@ fun PriorityAlertScreen(modifier: Modifier = Modifier) {
                 }
                 context.startActivity(intent)
             },
-            enabled = hasPermissions
+            enabled = hasPermissions && hasOverlayPermission
         ) {
             Text("Test Alert")
         }
